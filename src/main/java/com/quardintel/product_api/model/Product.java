@@ -1,14 +1,11 @@
 package com.quardintel.product_api.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Data;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Data
 public class Product {
 
     @Id
@@ -17,18 +14,30 @@ public class Product {
 
     @NotEmpty(message = "Product name cannot be empty")
     @Size(min = 2, max = 255, message = "Product name must be between 2 and 255 characters")
+    @Column(unique = true, nullable = false) // Unique constraint for product name
     private String name;
 
     @NotBlank(message = "Description is required")
+    @Column(nullable = false)
     private String description;
 
     @NotNull(message = "Price is required")
-    @PositiveOrZero(message = "Price must be positive or zero")
+    @Positive(message = "Price must be positive")
+    @Column(nullable = false)
     private Double price;
 
     @NotNull(message = "Quantity is required")
     @PositiveOrZero(message = "Quantity must be positive or zero")
+    @Column(nullable = false)
     private Integer quantity;
+
+    @ManyToMany
+    @JoinTable(
+            name = "product_category",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<Category> categories = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -68,5 +77,13 @@ public class Product {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public Set<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
     }
 }
